@@ -3,7 +3,7 @@
 ## To install streamlit 
 
 ```
-pip install streamlit
+pip3 -r install requirements.txt
 ```
 
 ## To run an app
