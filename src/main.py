@@ -1,16 +1,16 @@
 import streamlit as st
-import pandas as pd 
 import pydeck as pdk
+import pandas as pd
 
 st.write("Hello WOrld")
 
-location_data = pd.read_csv("../data/location_data.csv")
+location_data = pd.read_csv("data/location_data.csv")
 st.write(location_data)
 
-people_data = pd.read_csv("../data/people_data.csv")
+people_data = pd.read_csv("data/people_data.csv")
 st.write(people_data)
 
-security_log_Data = pd.read_csv("../data/security_logs.csv")
+security_log_Data = pd.read_csv("data/security_logs.csv")
 st.write(security_log_Data)
 
 coords = location_data.Geolocation.str.strip('{}').str.split(expand=True)
@@ -36,6 +36,3 @@ st.pydeck_chart(pdk.Deck(
         ),
     ],
 ))
-
-
-
