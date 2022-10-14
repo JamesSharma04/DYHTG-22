@@ -4,12 +4,15 @@ import pandas as pd
 
 st.write("Hello WOrld")
 
+st.write("Location Data")
 location_data = pd.read_csv("data/location_data.csv")
 st.write(location_data)
 
+st.write("People Data")
 people_data = pd.read_csv("data/people_data.csv")
 st.write(people_data)
 
+st.write("Security Data")
 security_log_Data = pd.read_csv("data/security_logs.csv")
 st.write(security_log_Data)
 
