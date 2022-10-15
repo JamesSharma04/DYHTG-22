@@ -1,6 +1,6 @@
 # DYHTG-22 Team 40 - SAS Challenge
 
-Visit https://jamessharma04-dyhtg-22-srcsuspicious-people-g1e0js.streamlitapp.com/
+Visit https://dyhtg-team-40.streamlitapp.com/ and have a look around!
 
 ## To use locally
 
