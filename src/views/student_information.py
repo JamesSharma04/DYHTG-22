@@ -132,7 +132,6 @@ def info_about_student(name, people_data):
         info[attr] = rowinfo[attr].iloc[0]
     firstpersonpronoun = "He" if info["Sex"] == "Male" else "She"
     thirdpersonpronoun = "his" if info["Sex"] == "Male" else "her"
-    print(info["Societies"])
     # st.write("societylist = " + info["Societies"])
     # st.write(societylist)
     is_string = type(info["Societies"]) == type("")
