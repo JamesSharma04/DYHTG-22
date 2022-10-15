@@ -13,7 +13,7 @@ import string
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2, venn3
 
-
+@st.cache
 def get_student_statements():
     coldata = ["Statement:", "Student Number:", "Name:", "Testimony:"]
     statementdata = []
@@ -41,7 +41,7 @@ def time_not_in_range(start, current, end):
     """Returns whether current is in the range [start, end]"""
     return start > current or current > end
 
-
+@st.cache
 def date_time_parser(i):
     time_list = i[3].split('-')
     opening_time_list = i[5].split('-')
@@ -76,7 +76,7 @@ def date_time_parser(i):
 
     return time_start, time_end, opening_time_start, opening_time_end
 
-
+@st.cache
 def generate_security_location_data(location_data, security_log_Data):
     location_data['Geolocation'] = location_data['Geolocation'].map(
         lambda x: x.lstrip('{').rstrip('}'))
@@ -88,7 +88,6 @@ def generate_security_location_data(location_data, security_log_Data):
     security_location_data = security_log_Data.merge(
         location_data, right_on="Building Name", left_on="Location")
     return security_location_data
-
 
 def check_past_closing(security_location_data):
     set_list = set()
@@ -117,7 +116,7 @@ def get_image(prompt):
 
 # st.image(get_image(prompt="25 year old male with #e079db hair colour"))
 
-
+@st.cache
 def hex2name(c):
     h_color = '#{:02x}{:02x}{:02x}'.format(int(c[0]), int(c[1]), int(c[2]))
     try:
@@ -134,7 +133,6 @@ def hex2name(c):
 
         nm = list(webcolors.CSS3_NAMES_TO_HEX.items())[closest_color][0]
     return nm
-
 
 def info_about_student(name):
     attrs = ["Student ID", "Name", "Age", "Sex",
@@ -170,7 +168,7 @@ def add_sidebar(name):
     st.sidebar.markdown(f"[{name}]({section})")
     return
 
-
+@st.cache
 def check_testimony(testimony, location_data_nickname):
     location_in_testimony = set()
     split_testimony = testimony.split(' ')
@@ -217,7 +215,6 @@ def check_testimony(testimony, location_data_nickname):
     )
 
     return location_in_testimony
-
 
 def main(location_data, people_data, security_log_Data, location_data_nickname):
     statements, namedata = get_student_statements()
@@ -313,6 +310,14 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
         })
         timeline(data, height=800)
 
+@st.cache
+def read_csv():
+    location_data = pd.read_csv("data/location_data.csv")
+
+    people_data = pd.read_csv("data/people_data.csv")
+
+    security_log_Data = pd.read_csv("data/security_logs.csv")
+    return location_data, people_data, security_log_Data
 
 if __name__ == "__main__":
 
@@ -336,11 +341,6 @@ if __name__ == "__main__":
         "Glasgow University Union": ["glasgow university union", "guu", "union", "of fun"]
 
     }
-
-    location_data = pd.read_csv("data/location_data.csv")
-
-    people_data = pd.read_csv("data/people_data.csv")
-
-    security_log_Data = pd.read_csv("data/security_logs.csv")
+    location_data, people_data, security_log_Data = read_csv()
 
     main(location_data, people_data, security_log_Data, location_data_nickname)
