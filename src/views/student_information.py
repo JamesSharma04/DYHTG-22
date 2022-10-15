@@ -285,7 +285,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
             buf = BytesIO()
             fig.savefig(buf, format="png")
-            st.image(buf)
+            st.image(buf, width=600)
 
         events = []
 
