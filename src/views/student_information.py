@@ -89,12 +89,20 @@ def generate_security_location_data(location_data, security_log_Data):
     return security_location_data
 
 
-def get_image(prompt):
-    client = replicate.Client(
-        api_token='d21eac06fcdbe3eb35c4d22453c018ad623a493f')
-    model = client.models.get("stability-ai/stable-diffusion")
-    output = model.predict(prompt="prompt")
-    return output
+def check_past_closing(security_location_data):
+    set_list = set()
+
+    for i in security_location_data.values:
+
+        time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
+            i)
+
+        if time_not_in_range(opening_time_start, time_start, opening_time_end) or time_not_in_range(opening_time_start, time_end, opening_time_end):
+            set_list.add(i[1])
+            st.markdown(
+                f"**{i[1]}** was at the {i[2]} after closing time from {time_start.time()} to {time_end.time()}. The {i[2]} opening times are {i[3]}.")
+
+    return set_list
 
 # st.image(get_image(prompt="25 year old male with #e079db hair colour"))
 
