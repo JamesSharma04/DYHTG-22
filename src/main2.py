@@ -1,6 +1,6 @@
 import streamlit as st
 import utils as utl
-from views import home, student_information, analysis
+from views import home, student_information, analysis, students
 
 st.set_page_config(layout="wide", page_title='Team 40 SAS challenge')
 st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -16,6 +16,8 @@ def navigation():
         student_information.load_view()
     elif route == "analysis":
         analysis.load_view()
+    elif route == 'students':
+        students.load_view()
     elif route == None:
         home.load_view()
 
