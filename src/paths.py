@@ -4,6 +4,3 @@ NAVBAR_PATHS = {
     'People data analysis': 'analysis',
     'All Students' : 'students'
 }
-
-SETTINGS = {
-}
