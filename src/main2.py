@@ -16,8 +16,6 @@ def navigation():
         student_information.load_view()
     elif route == "analysis":
         analysis.load_view()
-    elif route == 'students':
-        students.load_view()
     elif route == None:
         home.load_view()
 
