@@ -155,10 +155,14 @@ def info_about_student(name, people_data):
 
 def add_sidebar(name):
     section = "#about-"+name.replace(" ", "-").lower()
-    st.header(f"About {name}")
+    st.subheader(f"About {name}")
     st.sidebar.markdown(f"[{name}]({section})")
     return
 
+def add_header_sidebar(name):
+    section = "#about-"+name.replace(" ", "-").lower()
+    st.header(f"{name}")
+    st.sidebar.markdown(f"**{name}**")
 
 def check_testimony(testimony, location_data_nickname):
     location_in_testimony = set()
@@ -213,10 +217,9 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
     security_location_data = generate_security_location_data(
         location_data, security_log_Data)
-
+    add_header_sidebar("Students with Testimonies")
     for i in namedata:
         add_sidebar(i)
-
         _, info = info_about_student(i, people_data)
         st.subheader("Testimony")
 
@@ -327,6 +330,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
         st.subheader("Timeline of security log")
         timeline(data, height=600)
+    add_header_sidebar("All Other Students")
 
 
 def read_csv():
