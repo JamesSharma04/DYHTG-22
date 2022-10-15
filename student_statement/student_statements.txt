@@ -55,7 +55,7 @@ Testimony: I really don’t feel like it’s a requirement for me to provide to 
 
 Statement 12
 Student Number: 2774868P
-Student Name: Alice Patterson
+Name: Alice Patterson
 Testimony: My day started with my Engineering lecture. Then I headed to The St Andrews building for a while before finishing up in the library. A pretty normal day for me! 
 
 Statement 13
