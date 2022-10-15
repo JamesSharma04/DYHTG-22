@@ -55,7 +55,7 @@ Testimony: I really don’t feel like it’s a requirement for me to provide to 
 
 Statement 12
 Student Number: 2774868P
-Student Name: Alice Patterson
+Name: Alice Patterson
 Testimony: My day started with my Engineering lecture. Then I headed to The St Andrews building for a while before finishing up in the library. A pretty normal day for me! 
 
 Statement 13
@@ -113,7 +113,7 @@ Student Number: 2797619M
 Name: Russell Matthews
 Testimony: Not going to lie, I did not have an amazing day yesterday. Had my physics lecture at 9am. I miss it being like last year where I could just watch the lectures in bed, so not going to lie I was gubbed. Met my friend Beth at the Glasgow University Union some point before 11, and this is where the day kinda went downhill because she really wanted me to come to an event and I just wasn’t feeling it because I already had a plan with some other guys to go to HIVE. She stormed off, but we met back up again briefly at the park and just tried to speak it out. She still tried to get me to go to QMU, but I went to the GUU instead but she kept spamming my phone so I just called it an early night and went home before 10pm. 
 
- Statement 24
+Statement 24
 Student Number: 2733956H
 Name: Jill Hill
 Testimony: Yeah well…. I had a bit of a quiet one not gonna lie. Slept in all morning because I was out the night before and my only lecture was after lunch. Had a wee break at the union for half an hour to grab a subway, and then just went to the library which was meant to be a late night grind but I didn’t even make it to 7pm…. Whoopsies. 
