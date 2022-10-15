@@ -4,6 +4,8 @@ from streamlit_timeline import timeline
 import pandas as pd
 from datetime import datetime
 import numpy as np
+import replicate
+import webcolors
 
 
 def get_student_statement_df():
@@ -94,6 +96,18 @@ def check_past_closing(security_location_data):
     return set_list
 
 
+@st.cache
+def get_image(prompt):
+    client = replicate.Client(
+        api_token='d21eac06fcdbe3eb35c4d22453c018ad623a493f')
+    model = client.models.get("stability-ai/stable-diffusion")
+    type(model)
+    output = model.predict(prompt="prompt")
+    return output
+
+# st.image(get_image(prompt="25 year old male with #e079db hair colour"))
+
+
 def info_about_student(name):
     attrs = ["Student ID", "Name", "Age", "Sex",
              "Year of Study", "Subject", "Hair colour", "Societies"]
@@ -103,14 +117,16 @@ def info_about_student(name):
         info[attr] = rowinfo[attr].iloc[0]
     firstpersonpronoun = "He" if info["Sex"] == "Male" else "She"
     thirdpersonpronoun = "his" if info["Sex"] == "Male" else "her"
-    societylist = []
+    societylist = info["Societies"].replace(
+        "[", "").replace("]", "").replace("'", "")
     #st.write("societylist = " + info["Societies"])
     # st.write(societylist)
-    societydesc = "not in any societies" if info["Societies"] == "N/A" else "".join(
-        societylist)
+    societydesc = "not in any societies" if info["Societies"] == "N/A" else "in the " + societylist
 
+    #hairdesc=webcolors.hex_to_name(info["Hair colour"])
+    hairdesc = 'brown'
     description = st.markdown(
-        f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}.     "
+        f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} hair. {firstpersonpronoun} is {societydesc}.    "
     )
 
     return description
@@ -203,7 +219,7 @@ if __name__ == "__main__":
     }
 
     st.set_page_config(layout="wide")
-    st.title("Suspicious movements")
+    st.title("Student Information")
 
     location_data = pd.read_csv("data/location_data.csv")
 

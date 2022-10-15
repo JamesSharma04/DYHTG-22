@@ -23,12 +23,50 @@ with open ("student_statement/student_statements.txt") as f:
     st.write(namedata)
     st.write(testimonydata)
 
-aaaa = pd.DataFrame(np.array([statementdata,studentnumberdata,namedata,testimonydata]).T, columns = coldata)
-st.write(pd.DataFrame(aaaa))
+statements = pd.DataFrame(np.array([statementdata,studentnumberdata,namedata,testimonydata]).T, columns = coldata)
+st.write(pd.DataFrame(statements))
+st.write(statements.loc[statements["Name:"]=="Abdul Murphy"])
 
 people_data = pd.read_csv("data/people_data.csv")
 st.write(people_data)
 
 box = st.selectbox(label = 'Which Student would you like to view information about?',options = aaaa["Name:"])
 box
-st.write(people_data.loc[people_data["Name"]==box])
+st.write(box, "\n Societies: ", people_data.loc[people_data["Name"]==box]["Societies"])
+
+def info_about_student(name):
+    attrs = ["Student ID","Name", "Age", "Sex", "Year of Study", "Subject", "Hair Color", "Societies"]
+    info = {}
+    rowinfo = people_data.loc[people_data["Name"]==name]
+
+
+    return info
+
+def textual_representation_of_info(info):
+    desc = "HI"
+    return desc
+
+def is_outlier(name,info):
+    outlier = False
+
+
+
+    if outlier:
+
+        def detect_outliers(name, info):
+            outliers = "example"
+            return outliers
+    return False
+
+def display_plots(visualisations):
+    return
+    #void 
+
+#show each statement on the sidebar 
+
+# use AI generated image of suspect given age, sex, hair colour
+# hex to natural language desc of hair colour 
+# might be useful to cache results as statements fixed
+# ask if statement people more important/main thing to visualise 
+
+# sus: oscar brown, Barry robinson, 
