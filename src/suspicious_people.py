@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np 
 
 st.set_page_config(layout="wide")
-st.title("Suspicious movements")
+st.title("Student Information")
 
 # st.write("Location Data")
 location_data = pd.read_csv("data/location_data.csv")
@@ -93,7 +93,6 @@ security_location_data = security_log_Data.merge(
 
 set_list = set()
 
-
 for i in security_location_data.values:
 
     time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
@@ -114,22 +113,26 @@ def info_about_student(name):
         info[attr] = rowinfo[attr].iloc[0]
     firstpersonpronoun = "He" if info["Sex"]=="Male" else "She"
     thirdpersonpronoun = "his" if info["Sex"]=="Male" else "her"
-    societylist = []
+    societylist = info["Societies"].replace("[","").replace("]","").replace("'","")
     #st.write("societylist = " + info["Societies"])
     #st.write(societylist)
-    societydesc = "not in any societies" if info["Societies"]=="N/A" else "".join(societylist)
+    societydesc = "not in any societies" if info["Societies"]=="N/A" else "in the " + societylist
     
     description = st.markdown(
-        f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}.     "
+        f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} is {societydesc}.    "
     )
 
     return description
 
 
 for i in set_list:
-    
-    st.header(f"About {i}")
+    st.header(f"{i}")
+    with st.sidebar:
+        st.markdown(f"[{i}](#section-1)")
+        #for i in namedata:
+            #   st.write(i)
 
+    
     #replace with natural language desc
     info_about_student(i)
     st.subheader("Testimony")
