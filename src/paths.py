@@ -1,6 +1,7 @@
 NAVBAR_PATHS = {
     'Home': 'home',
     'Map Timeline': 'main',
-    'Student Information': 'student_information',
-    'People data analysis': 'analysis',
+    'Student Information (with testimonies)': 'student_information_testimonies',
+    'Student Information (all other)': 'student_information_other',
+    'People Data Analysis': 'analysis',
 }

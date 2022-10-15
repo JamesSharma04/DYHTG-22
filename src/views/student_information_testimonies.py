@@ -266,7 +266,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
             for venue in age_restrictive_venues:
                 if venue in locations_in_testimony or venue in person_loc_set:
                     unusual_behaviours.append(
-                        f"**{info['Name']}** has gone to the **{venue}** which is a age restrictive venue.")
+                        f"**{info['Name']}** has gone to the **{venue}** which is an age restrictive venue.")
 
         if len(unusual_behaviours) != 0:
             st.subheader("Unusual behaviours")
@@ -347,83 +347,6 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
         st.subheader("Timeline of security log")
         timeline(data, height=600)
-    add_header_sidebar("All Other Students")
-    namedate_other = people_data[~people_data['Name'].isin(
-        namedata)].Name.tolist()
-
-    for i in namedate_other:
-        add_sidebar(i)
-        _, info = info_about_student(i, people_data, hair_data)
-
-        person_loc = security_location_data.loc[security_location_data["Name"] == i]
-
-        person_loc_set = set(person_loc["Location"].values.tolist())
-
-        unusual_behaviours = []
-
-        persons_age = info["Age"]
-
-        if persons_age >= 30:
-            unusual_behaviours.append(
-                f"**{info['Name']}** is a mature student as their age is **{info['Age']}**.")
-        elif persons_age < 18:
-            unusual_behaviours.append(
-                f"**{info['Name']}** is a young student as their age is **{info['Age']}**.")
-
-            age_restrictive_venues = [
-                "Queen Margaret Union", "Glasgow University Union", "The Hive"]
-            for venue in age_restrictive_venues:
-                if venue in locations_in_testimony or venue in person_loc_set:
-                    unusual_behaviours.append(
-                        f"**{info['Name']}** has gone to the **{venue}** which is a age restrictive venue.")
-
-        if len(unusual_behaviours) != 0:
-            st.subheader("Unusual behaviours")
-            for i in unusual_behaviours:
-                st.markdown(f"- {i}")
-
-        events = []
-
-        for j in person_loc.values:
-            time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
-                j)
-
-            color = "darkgreen"
-            addit_text = ""
-            if time_not_in_range(opening_time_start, time_start, opening_time_end) or time_not_in_range(opening_time_start, time_end, opening_time_end):
-                color = "darkred"
-                addit_text += "(In building after closing time) "
-
-            events.append(
-                {
-                    "start_date": {
-                        "year": "2022",
-                        "month": "11",
-                        "hour": time_start.hour,
-                        "minute": time_start.minute
-                    },
-                    "end_date": {
-                        "year": "2022",
-                        "month": "11",
-                        "hour": time_end.hour,
-                        "minute": time_end.minute
-                    },
-                    "text": {
-                        "headline": f"{j[2]} {addit_text}",
-                        "text": j[6]
-                    },
-                    "background": {
-                        "color": color
-                    }
-                }
-            )
-
-        data = json.dumps({
-            "events": events
-        })
-
-        st.subheader("Timeline of security log")
-        timeline(data, height=600)
 
 
 @st.cache(allow_output_mutation=True)
@@ -450,11 +373,11 @@ def load_view():
         "Sir Alwyn Williams Building": ["sir alwyn williams building", "sir alwyn williams", "sawb", "alwyn"],
         "Library": ["library"],
         "St Andrews Building": ["st andrews building", "st andrews", "education"],
-        "Kelvingrove Park": ["kelvingrove park" "kelvingrove", "kelvin grove", "park", "kg"],
+        "Kelvingrove Park": ["kelvingrove park", "kelvingrove", "kelvin grove", "park", "kg"],
         "Joseph Black Building": ["joseph black building", "joseph black", "chemistry"],
         "Kelvin Building": ["kelvin building", "physics"],
         "Glasgow University Union": ["glasgow university union", "guu", "union", "pint of fun", "pints of fun"],
-        "Queen Margaret Union": ["queen margaret union", "union‎" "queen margaret", "qmu"]
+        "Queen Margaret Union": ["queen margaret union", "union‎", "queen margaret", "qmu"]
     }
     location_data, people_data, security_log_Data = read_csv()
 

@@ -12,18 +12,18 @@ def age_histogram(bin_size):
     data = people_data['Age'].values
 
     st.subheader("People under 18")
-    st.write(str(people_data.loc[people_data['Age'] < 18]['Name'].values)
-             .replace('[\'', '')
-             .replace('\']', '')
-             .replace('\' \'', ', ')
-             )
+    people_under_18 = str(
+        people_data.loc[people_data['Age'] < 18]['Name'].values).replace('[\'', '') .replace('\']', '').replace('\' \'', ', ')
+
+    for i in people_under_18.split(', '):
+        st.markdown(f"- {i}")
 
     st.subheader("People over 30")
-    st.write(str(people_data.loc[people_data['Age'] > 30]['Name'].values)
-             .replace('[\'', '')
-             .replace('\']', '')
-             .replace('\' \'', ', ')
-             )
+    people_over_30 = str(
+        people_data.loc[people_data['Age'] > 30]['Name'].values).replace('[\'', '').replace('\']', '').replace('\' \'', ', ')
+
+    for i in people_over_30.split(', '):
+        st.markdown(f"- {i}")
 
     st.subheader("Histogram of ages")
     fig, ax = plt.subplots(figsize=(7, 7))
@@ -31,7 +31,9 @@ def age_histogram(bin_size):
     ax.vlines(18, 0, 30, color='k', label="18")
     ax.vlines(30, 0, 30, color='k', label="30")
 
-    st.pyplot(fig)
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    st.image(buf)
 
 
 def load_view():
