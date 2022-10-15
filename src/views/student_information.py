@@ -104,14 +104,6 @@ def check_past_closing(security_location_data):
 
     return set_list
 
-
-def get_image(prompt):
-    client = replicate.Client(
-        api_token='d21eac06fcdbe3eb35c4d22453c018ad623a493f')
-    model = client.models.get("stability-ai/stable-diffusion")
-    output = model.predict(prompt="prompt")
-    return output
-
 # st.image(get_image(prompt="25 year old male with #e079db hair colour"))
 
 
