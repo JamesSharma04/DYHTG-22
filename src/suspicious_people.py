@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 import replicate
+from annotated_text import annotated_text
 import webcolors
 
 
@@ -132,7 +133,25 @@ def info_about_student(name):
     return description
 
 
-def main(location_data, people_data, security_log_Data):
+def check_testimony(testimony, location_data_nickname):
+    location_in_testimony = []
+    st.write(testimony)
+    split_testimony = testimony.split(' ')
+    for index, value in enumerate(split_testimony):
+        value = value.strip()
+        for j in location_data_nickname.keys():
+            loc_nickname = location_data_nickname[j]
+            if value in loc_nickname:
+                if index != len(split_testimony)-1:
+                    if split_testimony[index+1].strip() != "but":
+                        location_in_testimony.append(value)
+                else:
+                    location_in_testimony.append(value)
+
+    st.write(location_in_testimony)
+
+
+def main(location_data, people_data, security_log_Data, location_data_nickname):
     statements = get_student_statement_df()
 
     security_location_data = generate_security_location_data(
@@ -155,8 +174,12 @@ def main(location_data, people_data, security_log_Data):
         # replace with natural language desc
         info_about_student(i)
         st.subheader("Testimony")
-        st.write(statements.loc[statements["Name:"] == i]
-                 ["Testimony:"].iloc[0])
+
+        check_testimony(statements.loc[statements["Name:"] == i]
+                        ["Testimony:"].iloc[0], location_data_nickname)
+
+        # st.write(statements.loc[statements["Name:"] == i]
+        #          ["Testimony:"].iloc[0])
 
         suspicious_person_loc = security_location_data.loc[security_location_data["Name"] == i]
 
@@ -201,6 +224,10 @@ def main(location_data, people_data, security_log_Data):
 
 
 if __name__ == "__main__":
+
+    st.set_page_config(layout="wide")
+    st.title("Student Information")
+
     location_data_nickname = {
         "Boyd Orr Building": ["boyd orr", "boydy", "bob"],
         "James Watt Building": ["james watt", "jwb"],
@@ -218,13 +245,10 @@ if __name__ == "__main__":
         "Kelvin Building": ["kelvin", "physics"]
     }
 
-    st.set_page_config(layout="wide")
-    st.title("Student Information")
-
     location_data = pd.read_csv("data/location_data.csv")
 
     people_data = pd.read_csv("data/people_data.csv")
 
     security_log_Data = pd.read_csv("data/security_logs.csv")
 
-    main(location_data, people_data, security_log_Data)
+    main(location_data, people_data, security_log_Data, location_data_nickname)
