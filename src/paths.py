@@ -1,10 +1,8 @@
 NAVBAR_PATHS = {
-    'HOME':'home',
-    'ABOUT': 'about',
-    'ANALYSIS': 'analysis'
+    'Home': 'home',
+    'Student Information': 'student_information',
+    'People data analysis': 'analysis'
 }
 
 SETTINGS = {
-    'OPTIONS':'options',
-    'CONFIGURATION':'configuration'
 }

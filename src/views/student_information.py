@@ -1,4 +1,3 @@
-from cProfile import label
 import json
 import streamlit as st
 from streamlit_timeline import timeline
@@ -13,7 +12,7 @@ import string
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2, venn3
 
-@st.cache
+
 def get_student_statements():
     coldata = ["Statement:", "Student Number:", "Name:", "Testimony:"]
     statementdata = []
@@ -41,7 +40,7 @@ def time_not_in_range(start, current, end):
     """Returns whether current is in the range [start, end]"""
     return start > current or current > end
 
-@st.cache
+
 def date_time_parser(i):
     time_list = i[3].split('-')
     opening_time_list = i[5].split('-')
@@ -76,7 +75,7 @@ def date_time_parser(i):
 
     return time_start, time_end, opening_time_start, opening_time_end
 
-@st.cache
+
 def generate_security_location_data(location_data, security_log_Data):
     location_data['Geolocation'] = location_data['Geolocation'].map(
         lambda x: x.lstrip('{').rstrip('}'))
@@ -88,6 +87,7 @@ def generate_security_location_data(location_data, security_log_Data):
     security_location_data = security_log_Data.merge(
         location_data, right_on="Building Name", left_on="Location")
     return security_location_data
+
 
 def check_past_closing(security_location_data):
     set_list = set()
@@ -114,7 +114,7 @@ def get_image(prompt):
 
 # st.image(get_image(prompt="25 year old male with #e079db hair colour"))
 
-@st.cache
+
 def hex2name(c):
     h_color = '#{:02x}{:02x}{:02x}'.format(int(c[0]), int(c[1]), int(c[2]))
     try:
@@ -132,7 +132,8 @@ def hex2name(c):
         nm = list(webcolors.CSS3_NAMES_TO_HEX.items())[closest_color][0]
     return nm
 
-def info_about_student(name):
+
+def info_about_student(name, people_data):
     attrs = ["Student ID", "Name", "Age", "Sex",
              "Year of Study", "Subject", "Hair colour", "Societies"]
     info = {}
@@ -142,7 +143,7 @@ def info_about_student(name):
     firstpersonpronoun = "He" if info["Sex"] == "Male" else "She"
     thirdpersonpronoun = "his" if info["Sex"] == "Male" else "her"
     print(info["Societies"])
-    #st.write("societylist = " + info["Societies"])
+    # st.write("societylist = " + info["Societies"])
     # st.write(societylist)
     is_string = type(info["Societies"]) == type("")
     societydesc = "not in any societies" if not is_string else "in the "
@@ -150,8 +151,8 @@ def info_about_student(name):
         societydesc += info["Societies"].replace(
             "[", "").replace("]", "").replace("'", "")
 
-    #hairdesc=webcolors.hex_to_name(info["Hair colour"])
-    #hairdesc = hex2name(info["Hair colour"][1:])
+    # hairdesc=webcolors.hex_to_name(info["Hair colour"])
+    # hairdesc = hex2name(info["Hair colour"][1:])
     hairdesc = 'brown'
     description = st.markdown(
         f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} hair. {firstpersonpronoun} is {societydesc}.    "
@@ -165,6 +166,7 @@ def add_sidebar(name):
     st.header(f"About {name}")
     st.sidebar.markdown(f"[{name}]({section})")
     return
+
 
 def check_testimony(testimony, location_data_nickname):
     location_in_testimony = set()
@@ -213,6 +215,7 @@ def check_testimony(testimony, location_data_nickname):
 
     return location_in_testimony
 
+
 def main(location_data, people_data, security_log_Data, location_data_nickname):
     statements, namedata = get_student_statements()
 
@@ -224,7 +227,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
     for i in namedata:
         add_sidebar(i)
 
-        info_about_student(i)
+        info_about_student(i, people_data)
         st.subheader("Testimony")
 
         locations_in_testimony = check_testimony(statements.loc[statements["Name:"] == i]
@@ -244,10 +247,12 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
         if len(loc_only_testimony) != 0 or len(loc_only_log) != 0:
             st.subheader("Discrepancies between location data")
 
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=(6, 7))
+
             venn = venn2([locations_in_testimony, person_loc_set],
                          ('Testimony', 'Security logs'))
-            ax.legend(labels=["Testimony", "Security Logs", "Appears in both"])
+            ax.legend(
+                labels=["Testimony", "Security Logs", "Appears in both"])
 
             try:
                 venn.get_label_by_id('100').set_text(
@@ -305,9 +310,11 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
         data = json.dumps({
             "events": events
         })
-        timeline(data, height=800)
 
-@st.cache
+        st.subheader("Timeline")
+        timeline(data, height=600)
+
+
 def read_csv():
     location_data = pd.read_csv("data/location_data.csv")
 
@@ -316,9 +323,9 @@ def read_csv():
     security_log_Data = pd.read_csv("data/security_logs.csv")
     return location_data, people_data, security_log_Data
 
-if __name__ == "__main__":
 
-    st.set_page_config(layout="wide")
+def load_view():
+
     st.title("Student Information")
 
     location_data_nickname = {
