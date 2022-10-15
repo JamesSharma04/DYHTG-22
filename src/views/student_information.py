@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from matplotlib_venn import venn2, venn3
 from io import BytesIO
 
+
 def get_student_statements():
     coldata = ["Statement:", "Student Number:", "Name:", "Testimony:"]
     statementdata = []
