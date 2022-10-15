@@ -6,7 +6,7 @@
     z-index: 99999999999999999999;
     left: 0rem;
     top: 0rem;
-    height: 55px;
+    height: 60px;
 }
 
 .navitem{
@@ -14,10 +14,10 @@
     display: block;
     color: #f2f2f2 !important;
     text-align: center;
-    padding: 20px 20px;
+    padding: 15px 10px;
     text-decoration: none !important;
     border-bottom: 2px solid transparent;
-    font-size: 14px;
+    font-size: 20px;
     font-family: 'Trebuchet MS', sans-serif;
 }
 
