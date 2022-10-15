@@ -31,9 +31,7 @@ def age_histogram(bin_size):
     ax.vlines(18, 0, 30, color='k', label="18")
     ax.vlines(30, 0, 30, color='k', label="30")
 
-    buf = BytesIO()
-    fig.savefig(buf, format="png")
-    st.image(buf)
+    st.pyplot(fig)
 
 
 def load_view():

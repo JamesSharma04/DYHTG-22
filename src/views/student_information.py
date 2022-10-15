@@ -142,7 +142,8 @@ def info_about_student(name, people_data, hair_data):
         societydesc += info["Societies"].replace(
             "[", "").replace("]", "").replace("'", "")
 
-    hairdesc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Hair colour'].values[0]).lower()
+    hairdesc = str(hair_data.loc[hair_data['Name'] ==
+                   info['Name']]['Hair colour'].values[0]).lower()
     description = st.markdown(
         f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} hair. {firstpersonpronoun} is {societydesc}.    "
     )
@@ -164,18 +165,19 @@ def add_header_sidebar(name):
 
 def check_testimony(testimony, location_data_nickname):
     ldn = {kw: b for b, kws in location_data_nickname.items() for kw in kws}
-    tokens = re.split(re.compile("(?i)(" + "|".join(sorted(ldn.keys())[::-1])+")"), testimony)
+    tokens = re.split(re.compile(
+        "(?i)(" + "|".join(sorted(ldn.keys())[::-1])+")"), testimony)
     location_in_testimony = set()
-    
+
     for i in range(len(tokens)):
         if i % 2 == 1:
             location_name = ldn.get(tokens[i].lower(), "")
             tokens[i] = (tokens[i], location_name)
             location_in_testimony.add(location_name)
-            
+
     annotated_text(*tokens)
     return location_in_testimony - set([""])
-    
+
 #     location_in_testimony = set()
 #     split_testimony = testimony.split(' ')
 #     testimony_annotated = []
@@ -297,9 +299,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
             except:
                 pass
 
-            buf = BytesIO()
-            fig.savefig(buf, format="png")
-            st.image(buf, width=600)
+            st.pyplot(fig)
 
         events = []
 
@@ -441,20 +441,20 @@ def load_view():
     st.title("Student Information")
 
     location_data_nickname = {
-        "Boyd Orr Building": ["boyd orr", "boydy", "bob"],
-        "James Watt Building": ["james watt", "jwb"],
-        "Adam Smith Building": ["adam smith", "asb"],
+        "Boyd Orr Building": ["boyd orr building", "boyd orr", "boydy", "bob"],
+        "James Watt Building": ["james watt building", "james watt", "jwb"],
+        "Adam Smith Building": ["adam smith building", "adam smith", "asb"],
         "Main Building": ["main building"],
-        "Wolfson Medical Building": ["wolfson", "medicine", "medical" "medical"],
+        "Wolfson Medical Building": ["wolfson medical building", "wolfson", "medicine", "medical" "medical"],
         "The Hive": ["hive", "nightclub"],
-        "Sir Alwyn Williams Building": ["alwyn williams", "sawb", "alwyn"],
+        "Sir Alwyn Williams Building": ["sir alwyn williams building", "sir alwyn williams", "sawb", "alwyn"],
         "Library": ["library"],
-        "Queen Margaret Union": ["union which", "union rather", "union i", "queen margaret", "qmu"],
-        "St Andrews Building": ["st andrews", "education"],
-        "Kelvingrove Park": ["kelvingrove", "kelvin grove", "park", "kg"],
-        "Joseph Black Building": ["joseph black", "chemistry"],
-        "Kelvin Building": ["kelvin", "physics"],
-        "Glasgow University Union": ["glasgow university union", "guu", "union", "of fun"]
+        "St Andrews Building": ["st andrews building", "st andrews", "education"],
+        "Kelvingrove Park": ["kelvingrove park" "kelvingrove", "kelvin grove", "park", "kg"],
+        "Joseph Black Building": ["joseph black building", "joseph black", "chemistry"],
+        "Kelvin Building": ["kelvin building", "physics"],
+        "Glasgow University Union": ["glasgow university union", "guu", "union", "pint of fun", "pints of fun"],
+        "Queen Margaret Union": ["queen margaret union", "union‎" "queen margaret", "qmu"]
     }
     location_data, people_data, security_log_Data = read_csv()
 
