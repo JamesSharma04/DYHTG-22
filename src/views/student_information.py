@@ -132,7 +132,6 @@ def info_about_student(name, people_data, hair_data):
         info[attr] = rowinfo[attr].iloc[0]
     firstpersonpronoun = "He" if info["Sex"] == "Male" else "She"
     thirdpersonpronoun = "his" if info["Sex"] == "Male" else "her"
-    print(info["Societies"])
     # st.write("societylist = " + info["Societies"])
     # st.write(societylist)
     is_string = type(info["Societies"]) == type("")
@@ -141,8 +140,6 @@ def info_about_student(name, people_data, hair_data):
         societydesc += info["Societies"].replace(
             "[", "").replace("]", "").replace("'", "")
 
-    # hairdesc=webcolors.hex_to_name(info["Hair colour"])
-    # hairdesc = hex2name(info["Hair colour"][1:])
     hairdesc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Hair colour'].values[0]).lower()
     description = st.markdown(
         f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} hair. {firstpersonpronoun} is {societydesc}.    "
