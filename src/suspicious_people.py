@@ -3,6 +3,7 @@ import streamlit as st
 from streamlit_timeline import timeline
 import pandas as pd
 from datetime import datetime
+import numpy as np 
 
 st.set_page_config(layout="wide")
 st.title("Suspicious movements")
@@ -18,6 +19,26 @@ people_data = pd.read_csv("data/people_data.csv")
 # st.write("Security Data")
 security_log_Data = pd.read_csv("data/security_logs.csv")
 # st.write(security_log_Data)
+
+def get_student_statement_df():
+    coldata = ["Statement:","Student Number:","Name:","Testimony:"]
+    statementdata=[]
+    studentnumberdata=[]
+    namedata=[]
+    testimonydata=[]
+    with open ("student_statement/student_statements.txt") as f:
+        for line in f:
+            if "Statement" in line:
+                statementdata.append(line[10:-1])
+            if "Student Number:" in line:
+                studentnumberdata.append(line[16:-1])
+            if ("Name:") in line:
+                namedata.append(line[6:-1])
+            if ("Testimony:") in line:
+                testimonydata.append(line[11:-1])
+    return pd.DataFrame(np.array([statementdata,studentnumberdata,namedata,testimonydata]).T, columns = coldata)
+
+
 
 
 def time_not_in_range(start, current, end):
@@ -72,6 +93,7 @@ security_location_data = security_log_Data.merge(
 
 set_list = set()
 
+
 for i in security_location_data.values:
 
     time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
@@ -82,13 +104,36 @@ for i in security_location_data.values:
         st.markdown(
             f"**{i[1]}** was at the {i[2]} after closing time from {time_start.time()} to {time_end.time()}. The {i[2]} opening times are {i[3]}.")
 
+statements=get_student_statement_df()
+
+def info_about_student(name):
+    attrs = ["Student ID","Name", "Age", "Sex", "Year of Study", "Subject", "Hair colour", "Societies"]
+    info = {}
+    rowinfo = people_data.loc[people_data["Name"]==name]
+    for attr in attrs:
+        info[attr] = rowinfo[attr].iloc[0]
+    firstpersonpronoun = "He" if info["Sex"]=="Male" else "She"
+    thirdpersonpronoun = "his" if info["Sex"]=="Male" else "her"
+    societylist = []
+    #st.write("societylist = " + info["Societies"])
+    #st.write(societylist)
+    societydesc = "not in any societies" if info["Societies"]=="N/A" else "".join(societylist)
+    
+    description = st.markdown(
+        f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}.     "
+    )
+
+    return description
+
 
 for i in set_list:
-    st.header(i)
+    
+    st.header(f"About {i}")
 
+    #replace with natural language desc
+    info_about_student(i)
     st.subheader("Testimony")
-
-    st.write("A fire is pretty serious business, so even though I don't like authority or sharing my precious data you can get a pass today. I went to the St Andrews building for my lecture; I chilled in the Wolfson Medical building with some of my medic friends; then last I nipped to the Sir Alwyn Williams Building before ending the day in the Queen Margaret Union.")
+    st.write(statements.loc[statements["Name:"]==i]["Testimony:"].iloc[0])
 
     suspicious_person_loc = security_location_data.loc[security_location_data["Name"] == i]
 
