@@ -6,25 +6,25 @@ from datetime import datetime
 import numpy as np
 import replicate
 import webcolors
+from sklearn.metrics import mean_squared_error
 
+coldata = ["Statement:", "Student Number:", "Name:", "Testimony:"]
+statementdata = []
+studentnumberdata = []
+namedata = []
+testimonydata = []
+with open("student_statement/student_statements.txt") as f:
+    for line in f:
+        if "Statement" in line:
+            statementdata.append(line[10:-1])
+        if "Student Number:" in line:
+            studentnumberdata.append(line[16:-1])
+        if ("Name:") in line:
+            namedata.append(line[6:-1])
+        if ("Testimony:") in line:
+            testimonydata.append(line[11:-1])
 
-def get_student_statement_df():
-    coldata = ["Statement:", "Student Number:", "Name:", "Testimony:"]
-    statementdata = []
-    studentnumberdata = []
-    namedata = []
-    testimonydata = []
-    with open("student_statement/student_statements.txt") as f:
-        for line in f:
-            if "Statement" in line:
-                statementdata.append(line[10:-1])
-            if "Student Number:" in line:
-                studentnumberdata.append(line[16:-1])
-            if ("Name:") in line:
-                namedata.append(line[6:-1])
-            if ("Testimony:") in line:
-                testimonydata.append(line[11:-1])
-    return pd.DataFrame(np.array([statementdata, studentnumberdata, namedata, testimonydata]).T, columns=coldata)
+statements = pd.DataFrame(np.array([statementdata, studentnumberdata, namedata, testimonydata]).T, columns=coldata)
 
 
 def time_not_in_range(start, current, end):
@@ -107,6 +107,23 @@ def get_image(prompt):
 
 # st.image(get_image(prompt="25 year old male with #e079db hair colour"))
 
+def hex2name(c):
+    h_color = '#{:02x}{:02x}{:02x}'.format(int(c[0]), int(c[1]), int(c[2]))
+    try:
+        nm = webcolors.hex_to_name(h_color, spec='css3')
+    except ValueError as v_error:
+        print("{}".format(v_error))
+        rms_lst = []
+        for img_clr, img_hex in webcolors.CSS3_NAMES_TO_HEX.items():
+            cur_clr = webcolors.hex_to_rgb(img_hex)
+            rmse = np.sqrt(mean_squared_error(c, cur_clr))
+            rms_lst.append(rmse)
+
+        closest_color = rms_lst.index(min(rms_lst))
+
+        nm = list(webcolors.CSS3_NAMES_TO_HEX.items())[closest_color][0]
+    return nm
+
 
 def info_about_student(name):
     attrs = ["Student ID", "Name", "Age", "Sex",
@@ -117,23 +134,32 @@ def info_about_student(name):
         info[attr] = rowinfo[attr].iloc[0]
     firstpersonpronoun = "He" if info["Sex"] == "Male" else "She"
     thirdpersonpronoun = "his" if info["Sex"] == "Male" else "her"
-    societylist = info["Societies"].replace(
-        "[", "").replace("]", "").replace("'", "")
+    print(info["Societies"])
     #st.write("societylist = " + info["Societies"])
     # st.write(societylist)
-    societydesc = "not in any societies" if info["Societies"] == "N/A" else "in the " + societylist
+    is_string=type(info["Societies"]) == type("")
+    societydesc = "not in any societies" if not is_string else "in the "
+    if is_string:
+        societydesc += info["Societies"].replace(
+        "[", "").replace("]", "").replace("'", "")
 
     #hairdesc=webcolors.hex_to_name(info["Hair colour"])
-    hairdesc = 'brown'
+    #hairdesc = hex2name(info["Hair colour"][1:])
+    hairdesc='brown'
     description = st.markdown(
         f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} hair. {firstpersonpronoun} is {societydesc}.    "
     )
 
     return description
 
+def add_sidebar(name):
+    section="#about-"+name.replace(" ", "-").lower()
+    st.header(f"About {name}")
+    st.sidebar.markdown(f"[{name}]({section})")
+    return
+
 
 def main(location_data, people_data, security_log_Data):
-    statements = get_student_statement_df()
 
     security_location_data = generate_security_location_data(
         location_data, security_log_Data)
@@ -148,11 +174,9 @@ def main(location_data, people_data, security_log_Data):
 
     suspicious_people_list = check_past_closing(security_location_data)
 
-    for i in suspicious_people_list:
+    for i in namedata:
+        add_sidebar(i)
 
-        st.header(f"About {i}")
-
-        # replace with natural language desc
         info_about_student(i)
         st.subheader("Testimony")
         st.write(statements.loc[statements["Name:"] == i]
