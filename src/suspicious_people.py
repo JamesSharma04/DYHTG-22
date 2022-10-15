@@ -1,3 +1,4 @@
+from cProfile import label
 import json
 import streamlit as st
 from streamlit_timeline import timeline
@@ -8,6 +9,9 @@ import replicate
 from annotated_text import annotated_text
 import webcolors
 from sklearn.metrics import mean_squared_error
+import string
+import matplotlib.pyplot as plt
+from matplotlib_venn import venn2, venn3
 
 
 def get_student_statements():
@@ -168,21 +172,51 @@ def add_sidebar(name):
 
 
 def check_testimony(testimony, location_data_nickname):
-    location_in_testimony = []
-    st.write(testimony)
+    location_in_testimony = set()
     split_testimony = testimony.split(' ')
-    for index, value in enumerate(split_testimony):
-        value = value.strip()
+    testimony_annotated = []
+
+    for index, value_i in enumerate(split_testimony):
+        value = value_i.strip().lower().translate(
+            str.maketrans('', '', string.punctuation))
+
+        if index != len(split_testimony)-1:
+            value_2 = split_testimony[index+1].strip().lower().translate(
+                str.maketrans('', '', string.punctuation))
+            if value_2 != "but":
+                value_full = value + " " + value_2
+            else:
+                continue
+        else:
+            value_full = value
+
+        loc_found = False
         for j in location_data_nickname.keys():
             loc_nickname = location_data_nickname[j]
-            if value in loc_nickname:
-                if index != len(split_testimony)-1:
-                    if split_testimony[index+1].strip() != "but":
-                        location_in_testimony.append(value)
-                else:
-                    location_in_testimony.append(value)
+            if (value_full == "union" or value == "union") and "Queen Margaret Union" in location_in_testimony and value_full != "union rather":
+                break
+            if value_full in loc_nickname:
+                location_in_testimony.add(j)
+                testimony_annotated.append(
+                    (value_i+" ", j)
+                )
 
-    st.write(location_in_testimony)
+                loc_found = True
+                break
+            elif value in loc_nickname:
+                location_in_testimony.add(j)
+                testimony_annotated.append((value_i+" ", j))
+                loc_found = True
+                break
+
+        if loc_found is False:
+            testimony_annotated.append(value_i+" ")
+
+    annotated_text(
+        *testimony_annotated
+    )
+
+    return location_in_testimony
 
 
 def main(location_data, people_data, security_log_Data, location_data_nickname):
@@ -190,14 +224,6 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
     security_location_data = generate_security_location_data(
         location_data, security_log_Data)
-
-    security_location_data
-
-    for i in security_location_data.values[:1]:
-
-        time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
-            i)
-        st.write(time_start, time_end, opening_time_start, opening_time_end)
 
     suspicious_people_list = check_past_closing(security_location_data)
 
@@ -207,17 +233,48 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
         info_about_student(i)
         st.subheader("Testimony")
 
-        check_testimony(statements.loc[statements["Name:"] == i]
-                        ["Testimony:"].iloc[0], location_data_nickname)
+        locations_in_testimony = check_testimony(statements.loc[statements["Name:"] == i]
+                                                 ["Testimony:"].iloc[0], location_data_nickname)
 
         # st.write(statements.loc[statements["Name:"] == i]
         #          ["Testimony:"].iloc[0])
 
-        suspicious_person_loc = security_location_data.loc[security_location_data["Name"] == i]
+        person_loc = security_location_data.loc[security_location_data["Name"] == i]
+
+        person_loc_set = set(person_loc["Location"].values.tolist())
+
+        loc_only_testimony = locations_in_testimony-person_loc_set
+
+        loc_only_log = person_loc_set - locations_in_testimony
+
+        if len(loc_only_testimony) != 0 or len(loc_only_log) != 0:
+            st.subheader("Discrepancies between location data")
+
+            fig, ax = plt.subplots()
+            venn = venn2([locations_in_testimony, person_loc_set],
+                         ('Testimony', 'Security logs'))
+            ax.legend(labels=["Testimony", "Security Logs", "Appears in both"])
+
+            try:
+                venn.get_label_by_id('100').set_text(
+                    '\n'.join(map(str, loc_only_testimony)))
+            except:
+                pass
+            try:
+                venn.get_label_by_id('110').set_text(
+                    '\n'.join(map(str, locations_in_testimony & person_loc_set)))
+            except:
+                pass
+            try:
+                venn.get_label_by_id('010').set_text(
+                    '\n'.join(map(str, loc_only_log)))
+            except:
+                pass
+            st.pyplot(fig)
 
         events = []
 
-        for j in suspicious_person_loc.values:
+        for j in person_loc.values:
             time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
                 j)
 
@@ -231,11 +288,13 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
                 {
                     "start_date": {
                         "year": "2022",
+                        "month": "11",
                         "hour": time_start.hour,
                         "minute": time_start.minute
                     },
                     "end_date": {
                         "year": "2022",
+                        "month": "11",
                         "hour": time_end.hour,
                         "minute": time_end.minute
                     },
@@ -265,16 +324,17 @@ if __name__ == "__main__":
         "James Watt Building": ["james watt", "jwb"],
         "Adam Smith Building": ["adam smith", "asb"],
         "Main Building": ["main building"],
-        "Wolfson Medical Building": ["wolfson medical building", "medicine", "wolfson" "medical"],
-        "Glasgow University Union": ["glasgow university union", "guu", "union"],
+        "Wolfson Medical Building": ["wolfson", "medicine", "medical" "medical"],
         "The Hive": ["hive", "nightclub"],
-        "Sir Alwyn Williams Building": ["sir alwyn williams", "sawb", "alwyn"],
+        "Sir Alwyn Williams Building": ["alwyn williams", "sawb", "alwyn"],
         "Library": ["library"],
-        "Queen Margaret Union": ["queen margaret union", "qmu", "union"],
+        "Queen Margaret Union": ["union which", "union rather", "union i", "queen margaret", "qmu"],
         "St Andrews Building": ["st andrews", "education"],
         "Kelvingrove Park": ["kelvingrove", "kelvin grove", "park", "KG"],
         "Joseph Black Building": ["joseph black", "chemistry"],
-        "Kelvin Building": ["kelvin", "physics"]
+        "Kelvin Building": ["kelvin", "physics"],
+        "Glasgow University Union": ["glasgow university union", "guu", "union", "of fun"]
+
     }
 
     location_data = pd.read_csv("data/location_data.csv")
