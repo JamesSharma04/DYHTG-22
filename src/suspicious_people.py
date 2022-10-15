@@ -105,12 +105,10 @@ def check_past_closing(security_location_data):
     return set_list
 
 
-@st.cache
 def get_image(prompt):
     client = replicate.Client(
         api_token='d21eac06fcdbe3eb35c4d22453c018ad623a493f')
     model = client.models.get("stability-ai/stable-diffusion")
-    type(model)
     output = model.predict(prompt="prompt")
     return output
 
@@ -168,7 +166,6 @@ def add_sidebar(name):
     st.sidebar.markdown(f"[{name}]({section})")
     return
 
-@st.cache
 def check_testimony(testimony, location_data_nickname):
     location_in_testimony = set()
     split_testimony = testimony.split(' ')
