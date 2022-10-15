@@ -123,7 +123,7 @@ def hex2name(c):
     return nm
 
 
-def info_about_student(name, people_data):
+def info_about_student(name, people_data, hair_data):
     attrs = ["Student ID", "Name", "Age", "Sex",
              "Year of Study", "Subject", "Hair colour", "Societies"]
     info = {}
@@ -143,7 +143,7 @@ def info_about_student(name, people_data):
 
     # hairdesc=webcolors.hex_to_name(info["Hair colour"])
     # hairdesc = hex2name(info["Hair colour"][1:])
-    hairdesc = 'brown'
+    hairdesc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Hair colour'].values[0]).lower()
     description = st.markdown(
         f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} hair. {firstpersonpronoun} is {societydesc}.    "
     )
@@ -217,10 +217,12 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
     security_location_data = generate_security_location_data(
         location_data, security_log_Data)
 
+    hair_data = pd.read_csv("data/ai_prompt/folk_data")
+
     add_header_sidebar("Students with Testimonies")
     for i in namedata:
         add_sidebar(i)
-        _, info = info_about_student(i, people_data)
+        _, info = info_about_student(i, people_data, hair_data)
         st.subheader("Testimony")
 
         locations_in_testimony = check_testimony(statements.loc[statements["Name:"] == i]
@@ -339,7 +341,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
     for i in namedate_other:
         add_sidebar(i)
-        _, info = info_about_student(i, people_data)
+        _, info = info_about_student(i, people_data, hair_data)
 
         person_loc = security_location_data.loc[security_location_data["Name"] == i]
 
