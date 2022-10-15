@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import networkx as nx
+import matplotlib.pyplot as plt
 
 location_data = pd.read_csv("data/location_data.csv")
 people_data = pd.read_csv("data/people_data.csv")
@@ -19,6 +21,16 @@ peeps = peeps.replace('"', '')
 peeps = peeps.replace('\'', '')
 peeps = peeps.replace('\n', ', ')
 
-connections = set(peeps.split(', '))
+connections = [i.strip() for i in set(peeps.split(', ')) if i.strip() != str(box)]
 st.write(box_socs_l)
-st.write(list(connections))
+st.write(connections)
+
+G = nx.Graph()
+G.add_node(str(box))
+G.add_nodes_from(connections)
+G.add_edges_from([(str(box), i) for i in connections])
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
+pos = nx.kamada_kawai_layout(G)
+nx.draw(G, pos, node_size=1250, with_labels=True)
+st.pyplot()
