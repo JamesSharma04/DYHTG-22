@@ -104,8 +104,6 @@ def check_past_closing(security_location_data):
 
     return set_list
 
-# st.image(get_image(prompt="25 year old male with #e079db hair colour"))
-
 
 def hex2name(c):
     h_color = '#{:02x}{:02x}{:02x}'.format(int(c[0]), int(c[1]), int(c[2]))
@@ -159,10 +157,11 @@ def add_sidebar(name):
     st.sidebar.markdown(f"[{name}]({section})")
     return
 
+
 def add_header_sidebar(name):
-    section = "#about-"+name.replace(" ", "-").lower()
     st.header(f"{name}")
     st.sidebar.markdown(f"**{name}**")
+
 
 def check_testimony(testimony, location_data_nickname):
     location_in_testimony = set()
@@ -217,6 +216,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
     security_location_data = generate_security_location_data(
         location_data, security_log_Data)
+
     add_header_sidebar("Students with Testimonies")
     for i in namedata:
         add_sidebar(i)
@@ -234,27 +234,27 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
         loc_only_log = person_loc_set - locations_in_testimony
 
-        unsual_behaviours = []
+        unusual_behaviours = []
 
         persons_age = info["Age"]
 
         if persons_age >= 30:
-            unsual_behaviours.append(
+            unusual_behaviours.append(
                 f"**{info['Name']}** is a mature student as their age is **{info['Age']}**.")
         elif persons_age < 18:
-            unsual_behaviours.append(
+            unusual_behaviours.append(
                 f"**{info['Name']}** is a young student as their age is **{info['Age']}**.")
 
             age_restrictive_venues = [
                 "Queen Margaret Union", "Glasgow University Union", "The Hive"]
             for venue in age_restrictive_venues:
                 if venue in locations_in_testimony or venue in person_loc_set:
-                    unsual_behaviours.append(
+                    unusual_behaviours.append(
                         f"**{info['Name']}** has gone to the **{venue}** which is a age restrictive venue.")
 
-        if len(unsual_behaviours) != 0:
-            st.subheader("Unsual behaviours")
-            for i in unsual_behaviours:
+        if len(unusual_behaviours) != 0:
+            st.subheader("Unusual behaviours")
+            for i in unusual_behaviours:
                 st.markdown(f"- {i}")
 
         if len(loc_only_testimony) != 0 or len(loc_only_log) != 0:
@@ -334,8 +334,85 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
         st.subheader("Timeline of security log")
         timeline(data, height=600)
     add_header_sidebar("All Other Students")
+    namedate_other = people_data[~people_data['Name'].isin(
+        namedata)].Name.tolist()
+
+    for i in namedate_other:
+        add_sidebar(i)
+        _, info = info_about_student(i, people_data)
+
+        person_loc = security_location_data.loc[security_location_data["Name"] == i]
+
+        person_loc_set = set(person_loc["Location"].values.tolist())
+
+        unusual_behaviours = []
+
+        persons_age = info["Age"]
+
+        if persons_age >= 30:
+            unusual_behaviours.append(
+                f"**{info['Name']}** is a mature student as their age is **{info['Age']}**.")
+        elif persons_age < 18:
+            unusual_behaviours.append(
+                f"**{info['Name']}** is a young student as their age is **{info['Age']}**.")
+
+            age_restrictive_venues = [
+                "Queen Margaret Union", "Glasgow University Union", "The Hive"]
+            for venue in age_restrictive_venues:
+                if venue in locations_in_testimony or venue in person_loc_set:
+                    unusual_behaviours.append(
+                        f"**{info['Name']}** has gone to the **{venue}** which is a age restrictive venue.")
+
+        if len(unusual_behaviours) != 0:
+            st.subheader("Unusual behaviours")
+            for i in unusual_behaviours:
+                st.markdown(f"- {i}")
+
+        events = []
+
+        for j in person_loc.values:
+            time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
+                j)
+
+            color = "darkgreen"
+            addit_text = ""
+            if time_not_in_range(opening_time_start, time_start, opening_time_end) or time_not_in_range(opening_time_start, time_end, opening_time_end):
+                color = "darkred"
+                addit_text += "(In building after closing time) "
+
+            events.append(
+                {
+                    "start_date": {
+                        "year": "2022",
+                        "month": "11",
+                        "hour": time_start.hour,
+                        "minute": time_start.minute
+                    },
+                    "end_date": {
+                        "year": "2022",
+                        "month": "11",
+                        "hour": time_end.hour,
+                        "minute": time_end.minute
+                    },
+                    "text": {
+                        "headline": f"{j[2]} {addit_text}",
+                        "text": j[6]
+                    },
+                    "background": {
+                        "color": color
+                    }
+                }
+            )
+
+        data = json.dumps({
+            "events": events
+        })
+
+        st.subheader("Timeline of security log")
+        timeline(data, height=600)
 
 
+@st.cache(allow_output_mutation=True)
 def read_csv():
     location_data = pd.read_csv("data/location_data.csv")
 
