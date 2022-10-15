@@ -89,22 +89,6 @@ def generate_security_location_data(location_data, security_log_Data):
     return security_location_data
 
 
-def check_past_closing(security_location_data):
-    set_list = set()
-
-    for i in security_location_data.values:
-
-        time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
-            i)
-
-        if time_not_in_range(opening_time_start, time_start, opening_time_end) or time_not_in_range(opening_time_start, time_end, opening_time_end):
-            set_list.add(i[1])
-            st.markdown(
-                f"**{i[1]}** was at the {i[2]} after closing time from {time_start.time()} to {time_end.time()}. The {i[2]} opening times are {i[3]}.")
-
-    return set_list
-
-
 def get_image(prompt):
     client = replicate.Client(
         api_token='d21eac06fcdbe3eb35c4d22453c018ad623a493f')
@@ -158,7 +142,7 @@ def info_about_student(name, people_data):
         f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} hair. {firstpersonpronoun} is {societydesc}.    "
     )
 
-    return description
+    return description, info
 
 
 def add_sidebar(name):
@@ -222,19 +206,14 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
     security_location_data = generate_security_location_data(
         location_data, security_log_Data)
 
-    suspicious_people_list = check_past_closing(security_location_data)
-
     for i in namedata:
         add_sidebar(i)
 
-        info_about_student(i, people_data)
+        _, info = info_about_student(i, people_data)
         st.subheader("Testimony")
 
         locations_in_testimony = check_testimony(statements.loc[statements["Name:"] == i]
                                                  ["Testimony:"].iloc[0], location_data_nickname)
-
-        # st.write(statements.loc[statements["Name:"] == i]
-        #          ["Testimony:"].iloc[0])
 
         person_loc = security_location_data.loc[security_location_data["Name"] == i]
 
@@ -244,6 +223,29 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
 
         loc_only_log = person_loc_set - locations_in_testimony
 
+        unsual_behaviours = []
+
+        persons_age = info["Age"]
+
+        if persons_age >= 30:
+            unsual_behaviours.append(
+                f"**{info['Name']}** is a mature student as their age is **{info['Age']}**.")
+        elif persons_age < 18:
+            unsual_behaviours.append(
+                f"**{info['Name']}** is a young student as their age is **{info['Age']}**.")
+
+            age_restrictive_venues = [
+                "Queen Margaret Union", "Glasgow University Union", "The Hive"]
+            for venue in age_restrictive_venues:
+                if venue in locations_in_testimony or venue in person_loc_set:
+                    unsual_behaviours.append(
+                        f"**{info['Name']}** has gone to the **{venue}** which is a age restrictive venue.")
+
+        if len(unsual_behaviours) != 0:
+            st.subheader("Unsual behaviours")
+            for i in unsual_behaviours:
+                st.markdown(f"- {i}")
+
         if len(loc_only_testimony) != 0 or len(loc_only_log) != 0:
             st.subheader("Discrepancies between location data")
 
@@ -252,7 +254,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
             venn = venn2([locations_in_testimony, person_loc_set],
                          ('Testimony', 'Security logs'))
             ax.legend(
-                labels=["Testimony", "Security Logs", "Appears in both"])
+                labels=["Testimony", "Security logs", "Appears in both"])
 
             try:
                 venn.get_label_by_id('100').set_text(
@@ -281,8 +283,12 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
             addit_text = ""
             if time_not_in_range(opening_time_start, time_start, opening_time_end) or time_not_in_range(opening_time_start, time_end, opening_time_end):
                 color = "darkred"
-                addit_text = "(In building after closing time)"
-            # st.write(time_start, time_end, opening_time_start, opening_time_end)
+                addit_text += "(In building after closing time) "
+
+            if j[2] in loc_only_log:
+                color = "darkred"
+                addit_text = "(Location discrepancy)"
+
             events.append(
                 {
                     "start_date": {
@@ -311,7 +317,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
             "events": events
         })
 
-        st.subheader("Timeline")
+        st.subheader("Timeline of security log")
         timeline(data, height=600)
 
 
@@ -343,7 +349,6 @@ def load_view():
         "Joseph Black Building": ["joseph black", "chemistry"],
         "Kelvin Building": ["kelvin", "physics"],
         "Glasgow University Union": ["glasgow university union", "guu", "union", "of fun"]
-
     }
     location_data, people_data, security_log_Data = read_csv()
 
