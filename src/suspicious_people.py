@@ -143,10 +143,10 @@ for i in set_list:
         time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
             j)
 
-        color = "lightgreen"
+        color = "darkgreen"
         addit_text = ""
         if time_not_in_range(opening_time_start, time_start, opening_time_end) or time_not_in_range(opening_time_start, time_end, opening_time_end):
-            color = "lightcoral"
+            color = "darkred"
             addit_text = "(In building after closing time)"
         # st.write(time_start, time_end, opening_time_start, opening_time_end)
         events.append(
