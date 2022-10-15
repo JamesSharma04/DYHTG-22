@@ -1,8 +1,7 @@
 import streamlit as st
-import base64
 from streamlit.components.v1 import html
 
-from paths import NAVBAR_PATHS, SETTINGS
+from paths import NAVBAR_PATHS
 
 
 def inject_custom_css():
@@ -18,29 +17,16 @@ def get_current_route():
 
 
 def navbar_component():
-    with open("src/assets/images/settings.jpg", "rb") as image_file:
-        image_as_base64 = base64.b64encode(image_file.read())
 
     navbar_items = ''
     for key, value in NAVBAR_PATHS.items():
         navbar_items += (f'<a class="navitem" href="/?nav={value}">{key}</a>')
-
-    settings_items = ''
-    for key, value in SETTINGS.items():
-        settings_items += (
-            f'<a href="/?nav={value}" class="settingsNav">{key}</a>')
 
     component = rf'''
             <nav class="container navbar" id="navbar">
                 <ul class="navlist">
                 {navbar_items}
                 </ul>
-                <div class="dropdown" id="settingsDropDown">
-                    <img class="dropbtn" src="data:image/png;base64, {image_as_base64.decode("utf-8")}"/>
-                    <div id="myDropdown" class="dropdown-content">
-                        {settings_items}
-                    </div>
-                </div>
             </nav>
             '''
     st.markdown(component, unsafe_allow_html=True)
@@ -66,15 +52,6 @@ def navbar_component():
                 dropWindow.style.visibility = "hidden";
             }
         };
-        
-        var settingsNavs = window.parent.document.getElementsByClassName("settingsNav");
-        var cleanSettings = function(navigation_element) {
-            navigation_element.removeAttribute('target')
-        }
-        
-        for (var i = 0; i < settingsNavs.length; i++) {
-            cleanSettings(settingsNavs[i]);
-        }
     </script>
     '''
     html(js)
