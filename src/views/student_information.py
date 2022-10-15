@@ -11,7 +11,7 @@ from sklearn.metrics import mean_squared_error
 import string
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2, venn3
-
+from io import BytesIO
 
 def get_student_statements():
     coldata = ["Statement:", "Student Number:", "Name:", "Testimony:"]
@@ -282,7 +282,10 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
                     '\n'.join(map(str, loc_only_log)))
             except:
                 pass
-            st.pyplot(fig)
+
+            buf = BytesIO()
+            fig.savefig(buf, format="png")
+            st.image(buf)
 
         events = []
 
