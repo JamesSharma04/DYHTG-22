@@ -2,7 +2,7 @@ import streamlit as st
 import pydeck as pdk
 import pandas as pd
 
-st.write("Hello WOrld")
+st.write("Hello World")
 
 st.write("Location Data")
 location_data = pd.read_csv("data/location_data.csv")
