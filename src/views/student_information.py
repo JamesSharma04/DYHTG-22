@@ -140,9 +140,12 @@ def info_about_student(name, people_data, hair_data):
         societydesc += info["Societies"].replace(
             "[", "").replace("]", "").replace("'", "")
 
+    img_loc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Img location'].values[0]).lower()
+    st.image(f'images/student_images/images/{img_loc}')
+
     hairdesc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Hair colour'].values[0]).lower()
     description = st.markdown(
-        f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} hair. {firstpersonpronoun} is {societydesc}.    "
+        f"**{info['Name']}** (Student ID: {info['Student ID']}) is a {info['Age']} year old {info['Sex'].lower()}. {firstpersonpronoun} is in year {info['Year of Study']}, studying {info['Subject'].lower()}. {firstpersonpronoun} has {hairdesc} coloured hair. {firstpersonpronoun} is {societydesc}.    "
     )
 
     return description, info
