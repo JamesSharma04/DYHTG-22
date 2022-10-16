@@ -12,6 +12,8 @@ import string
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2, venn3
 from io import BytesIO
+import re
+
 
 def get_student_statements():
     coldata = ["Statement:", "Student Number:", "Name:", "Testimony:"]
@@ -141,7 +143,7 @@ def info_about_student(name, people_data, hair_data):
             "[", "").replace("]", "").replace("'", "")
 
     img_loc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Img location'].values[0]).lower()
-    st.image(f'images/student_images/images/{img_loc}', width=150)
+    st.image(f'images/student_images/images/{img_loc}', width=175)
 
     hairdesc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Hair colour'].values[0]).lower()
     description = st.markdown(
@@ -164,51 +166,65 @@ def add_header_sidebar(name):
 
 
 def check_testimony(testimony, location_data_nickname):
+    ldn = {kw: b for b, kws in location_data_nickname.items() for kw in kws}
+    tokens = re.split(re.compile(
+        "(?i)(" + "|".join(sorted(ldn.keys())[::-1])+")"), testimony)
     location_in_testimony = set()
-    split_testimony = testimony.split(' ')
-    testimony_annotated = []
 
-    for index, value_i in enumerate(split_testimony):
-        value = value_i.strip().lower().translate(
-            str.maketrans('', '', string.punctuation))
+    for i in range(len(tokens)):
+        if i % 2 == 1:
+            location_name = ldn.get(tokens[i].lower(), "")
+            tokens[i] = (tokens[i], location_name)
+            location_in_testimony.add(location_name)
 
-        if index != len(split_testimony)-1:
-            value_2 = split_testimony[index+1].strip().lower().translate(
-                str.maketrans('', '', string.punctuation))
-            if value_2 != "but":
-                value_full = value + " " + value_2
-            else:
-                continue
-        else:
-            value_full = value
+    annotated_text(*tokens)
+    return location_in_testimony - set([""])
 
-        loc_found = False
-        for j in location_data_nickname.keys():
-            loc_nickname = location_data_nickname[j]
-            if (value_full == "union" or value == "union") and "Queen Margaret Union" in location_in_testimony and value_full != "union rather":
-                break
-            if value_full in loc_nickname:
-                location_in_testimony.add(j)
-                testimony_annotated.append(
-                    (value_i+" ", j)
-                )
+#     location_in_testimony = set()
+#     split_testimony = testimony.split(' ')
+#     testimony_annotated = []
 
-                loc_found = True
-                break
-            elif value in loc_nickname:
-                location_in_testimony.add(j)
-                testimony_annotated.append((value_i+" ", j))
-                loc_found = True
-                break
+#     for index, value_i in enumerate(split_testimony):
+#         value = value_i.strip().lower().translate(
+#             str.maketrans('', '', string.punctuation))
 
-        if loc_found is False:
-            testimony_annotated.append(value_i+" ")
+#         if index != len(split_testimony)-1:
+#             value_2 = split_testimony[index+1].strip().lower().translate(
+#                 str.maketrans('', '', string.punctuation))
+#             if value_2 != "but":
+#                 value_full = value + " " + value_2
+#             else:
+#                 continue
+#         else:
+#             value_full = value
 
-    annotated_text(
-        *testimony_annotated
-    )
+#         loc_found = False
+#         for j in location_data_nickname.keys():
+#             loc_nickname = location_data_nickname[j]
+#             if (value_full == "union" or value == "union") and "Queen Margaret Union" in location_in_testimony and value_full != "union rather":
+#                 break
+#             if value_full in loc_nickname:
+#                 location_in_testimony.add(j)
+#                 testimony_annotated.append(
+#                     (value_i+" ", j)
+#                 )
 
-    return location_in_testimony
+#                 loc_found = True
+#                 break
+#             elif value in loc_nickname:
+#                 location_in_testimony.add(j)
+#                 testimony_annotated.append((value_i+" ", j))
+#                 loc_found = True
+#                 break
+
+#         if loc_found is False:
+#             testimony_annotated.append(value_i+" ")
+
+#     annotated_text(
+#         *testimony_annotated
+#     )
+
+#     return location_in_testimony
 
 
 def main(location_data, people_data, security_log_Data, location_data_nickname):
@@ -252,7 +268,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
             for venue in age_restrictive_venues:
                 if venue in locations_in_testimony or venue in person_loc_set:
                     unusual_behaviours.append(
-                        f"**{info['Name']}** has gone to the **{venue}** which is a age restrictive venue.")
+                        f"**{info['Name']}** has gone to the **{venue}** which is an age restrictive venue.")
 
         if len(unusual_behaviours) != 0:
             st.subheader("Unusual behaviours")
@@ -285,9 +301,7 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
             except:
                 pass
 
-            buf = BytesIO()
-            fig.savefig(buf, format="png")
-            st.image(buf, width=600)
+            st.pyplot(fig)
 
         events = []
 
@@ -304,83 +318,6 @@ def main(location_data, people_data, security_log_Data, location_data_nickname):
             if j[2] in loc_only_log:
                 color = "darkred"
                 addit_text = "(Location discrepancy)"
-
-            events.append(
-                {
-                    "start_date": {
-                        "year": "2022",
-                        "month": "11",
-                        "hour": time_start.hour,
-                        "minute": time_start.minute
-                    },
-                    "end_date": {
-                        "year": "2022",
-                        "month": "11",
-                        "hour": time_end.hour,
-                        "minute": time_end.minute
-                    },
-                    "text": {
-                        "headline": f"{j[2]} {addit_text}",
-                        "text": j[6]
-                    },
-                    "background": {
-                        "color": color
-                    }
-                }
-            )
-
-        data = json.dumps({
-            "events": events
-        })
-
-        st.subheader("Timeline of security log")
-        timeline(data, height=600)
-    add_header_sidebar("All Other Students")
-    namedate_other = people_data[~people_data['Name'].isin(
-        namedata)].Name.tolist()
-
-    for i in namedate_other:
-        add_sidebar(i)
-        _, info = info_about_student(i, people_data, hair_data)
-
-        person_loc = security_location_data.loc[security_location_data["Name"] == i]
-
-        person_loc_set = set(person_loc["Location"].values.tolist())
-
-        unusual_behaviours = []
-
-        persons_age = info["Age"]
-
-        if persons_age >= 30:
-            unusual_behaviours.append(
-                f"**{info['Name']}** is a mature student as their age is **{info['Age']}**.")
-        elif persons_age < 18:
-            unusual_behaviours.append(
-                f"**{info['Name']}** is a young student as their age is **{info['Age']}**.")
-
-            age_restrictive_venues = [
-                "Queen Margaret Union", "Glasgow University Union", "The Hive"]
-            for venue in age_restrictive_venues:
-                if venue in locations_in_testimony or venue in person_loc_set:
-                    unusual_behaviours.append(
-                        f"**{info['Name']}** has gone to the **{venue}** which is a age restrictive venue.")
-
-        if len(unusual_behaviours) != 0:
-            st.subheader("Unusual behaviours")
-            for i in unusual_behaviours:
-                st.markdown(f"- {i}")
-
-        events = []
-
-        for j in person_loc.values:
-            time_start, time_end, opening_time_start, opening_time_end = date_time_parser(
-                j)
-
-            color = "darkgreen"
-            addit_text = ""
-            if time_not_in_range(opening_time_start, time_start, opening_time_end) or time_not_in_range(opening_time_start, time_end, opening_time_end):
-                color = "darkred"
-                addit_text += "(In building after closing time) "
 
             events.append(
                 {
@@ -429,20 +366,20 @@ def load_view():
     st.title("Student Information")
 
     location_data_nickname = {
-        "Boyd Orr Building": ["boyd orr", "boydy", "bob"],
-        "James Watt Building": ["james watt", "jwb"],
-        "Adam Smith Building": ["adam smith", "asb"],
+        "Boyd Orr Building": ["boyd orr building", "boyd orr", "boydy", "bob"],
+        "James Watt Building": ["james watt building", "james watt", "jwb"],
+        "Adam Smith Building": ["adam smith building", "adam smith", "asb"],
         "Main Building": ["main building"],
-        "Wolfson Medical Building": ["wolfson", "medicine", "medical" "medical"],
+        "Wolfson Medical Building": ["wolfson medical building", "wolfson", "medicine", "medical" "medical"],
         "The Hive": ["hive", "nightclub"],
-        "Sir Alwyn Williams Building": ["alwyn williams", "sawb", "alwyn"],
+        "Sir Alwyn Williams Building": ["sir alwyn williams building", "sir alwyn williams", "sawb", "alwyn"],
         "Library": ["library"],
-        "Queen Margaret Union": ["union which", "union rather", "union i", "queen margaret", "qmu"],
-        "St Andrews Building": ["st andrews", "education"],
-        "Kelvingrove Park": ["kelvingrove", "kelvin grove", "park", "KG"],
-        "Joseph Black Building": ["joseph black", "chemistry"],
-        "Kelvin Building": ["kelvin", "physics"],
-        "Glasgow University Union": ["glasgow university union", "guu", "union", "of fun"]
+        "St Andrews Building": ["st andrews building", "st andrews", "education"],
+        "Kelvingrove Park": ["kelvingrove park", "kelvingrove", "kelvin grove", "park", "kg"],
+        "Joseph Black Building": ["joseph black building", "joseph black", "chemistry"],
+        "Kelvin Building": ["kelvin building", "physics"],
+        "Glasgow University Union": ["glasgow university union", "guu", "union", "pint of fun", "pints of fun"],
+        "Queen Margaret Union": ["queen margaret union", "union‎", "queen margaret", "qmu"]
     }
     location_data, people_data, security_log_Data = read_csv()
 
