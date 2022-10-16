@@ -141,7 +141,7 @@ def info_about_student(name, people_data, hair_data):
             "[", "").replace("]", "").replace("'", "")
 
     img_loc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Img location'].values[0]).lower()
-    st.image(f'images/student_images/images/{img_loc}')
+    st.image(f'images/student_images/images/{img_loc}', width=150)
 
     hairdesc = str(hair_data.loc[hair_data['Name'] == info['Name']]['Hair colour'].values[0]).lower()
     description = st.markdown(
