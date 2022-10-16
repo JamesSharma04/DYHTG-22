@@ -7,6 +7,8 @@ from random import random
 from math import cos, sin
 
 def load_view():
+    sus_students = ['Abdul Murphy', 'Beth Jones', 'Russell Matthews']
+
     start_time = datetime(2022, 11, 1, 3, 0)
 
     @st.cache(persist=True)
@@ -135,6 +137,12 @@ def load_view():
         students['lon'] = lons
         students['size'] = sizes
 
+        sus = []
+        for i in students.index:
+            sus.append(60*int(students['name'][i] in sus_students))
+
+        students['sus'] = sus
+
     update_locs(st.session_state.get("map_slider_key", start_time))
 
     building_layer = pdk.Layer(
@@ -169,9 +177,12 @@ def load_view():
         radius_units=String('pixels'),
         opacity=0.3,
         filled=True,
+        stroked=True,
         get_position='[lon, lat]',
         get_radius='size',
         get_fill_color='color',
+        get_line_color=[255,255,255],
+        get_line_width='sus',
     )
 
     deck = pdk.Deck(
