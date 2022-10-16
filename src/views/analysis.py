@@ -35,7 +35,22 @@ def age_histogram(bin_size):
     fig.savefig(buf, format="png")
     st.image(buf)
 
+def height_histogram(bin_size):
+    data = people_data['Height'].values
+
+
+    st.subheader("Histogram of Heights")
+    fig, ax = plt.subplots(figsize=(7, 7))
+    ax.hist(data, bins=bin_size, color='c', alpha=0.65)
+
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    st.image(buf)
 
 def load_view():
     st.title('Analysis Page')
     age_histogram(20)
+    height_histogram(20)
+
+
+    
