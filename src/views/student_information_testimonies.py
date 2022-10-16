@@ -60,8 +60,6 @@ def date_time_parser(i):
     time_end = datetime(year=2022, month=11, day=day, hour=int(
         time_list[1][:2]), minute=int(time_list[1][2:]))
 
-    ###
-
     opening_time_start = datetime(year=2022, month=11, day=1, hour=int(
         opening_time_list[0].lstrip()[:2]), minute=int(opening_time_list[0].lstrip()[2:]))
 
@@ -179,53 +177,6 @@ def check_testimony(testimony, location_data_nickname):
 
     annotated_text(*tokens)
     return location_in_testimony - set([""])
-
-#     location_in_testimony = set()
-#     split_testimony = testimony.split(' ')
-#     testimony_annotated = []
-
-#     for index, value_i in enumerate(split_testimony):
-#         value = value_i.strip().lower().translate(
-#             str.maketrans('', '', string.punctuation))
-
-#         if index != len(split_testimony)-1:
-#             value_2 = split_testimony[index+1].strip().lower().translate(
-#                 str.maketrans('', '', string.punctuation))
-#             if value_2 != "but":
-#                 value_full = value + " " + value_2
-#             else:
-#                 continue
-#         else:
-#             value_full = value
-
-#         loc_found = False
-#         for j in location_data_nickname.keys():
-#             loc_nickname = location_data_nickname[j]
-#             if (value_full == "union" or value == "union") and "Queen Margaret Union" in location_in_testimony and value_full != "union rather":
-#                 break
-#             if value_full in loc_nickname:
-#                 location_in_testimony.add(j)
-#                 testimony_annotated.append(
-#                     (value_i+" ", j)
-#                 )
-
-#                 loc_found = True
-#                 break
-#             elif value in loc_nickname:
-#                 location_in_testimony.add(j)
-#                 testimony_annotated.append((value_i+" ", j))
-#                 loc_found = True
-#                 break
-
-#         if loc_found is False:
-#             testimony_annotated.append(value_i+" ")
-
-#     annotated_text(
-#         *testimony_annotated
-#     )
-
-#     return location_in_testimony
-
 
 def main(location_data, people_data, security_log_Data, location_data_nickname):
     statements, namedata = get_student_statements()
