@@ -3,7 +3,8 @@ import pydeck as pdk
 from pydeck.types import String
 import pandas as pd
 from datetime import datetime, timedelta, time
-
+from random import random
+from math import cos, sin
 
 def load_view():
     start_time = datetime(2022, 11, 1, 3, 0)
@@ -83,12 +84,18 @@ def load_view():
     students.columns = ['name']
     students['color'] = list(map(hextorgb, people_data['Hair colour']))
     students[['lat', 'lon']] = 0
+    students['size'] = 12
 
     def curr_loc(name, time):
         timeline = timelines[name]
         last_lat = -55
         last_lon = 176
         last_endtime = datetime(2022, 11, 1, 0, 0)
+
+        start = datetime(2022, 11, 1, int(timeline['start'].iloc[0])//100, int(timeline['start'].iloc[0]) % 100)
+        if start > time:
+            return (0, 0, 0)
+
         for _, loc in timeline.iterrows():
             start, end, lat, lon = loc
 
@@ -96,20 +103,24 @@ def load_view():
             end = datetime(2022, 11, 1, int(end)//100, int(end) % 100)
 
             if start > end:
-                end.replace(day=2)
-
+                end = end.replace(day=2) 
+                
             if time < start:
-                t = (time - last_endtime) / (start - last_endtime)
-                return (last_lat * (1 - t) + lat * t, last_lon * (1 - t) + lon * t)
+                t = 0
+                if (start - last_endtime) != timedelta(0):
+                    t = (time - last_endtime) / (start - last_endtime)
+                return (last_lat * (1 - t) + lat * t, last_lon * (1 - t) + lon * t, 12)
 
-            if start < time < end:
-                return (lat, lon)
+            if start <= time < end:
+                r = random() * 0.0001
+                theta = random() * 6.28
+                return (lat + r * sin(theta), lon + r * cos(theta), 6)
 
             last_lat = lat
             last_lon = lon
             last_endtime = end
 
-        return (0, 0)
+        return (0, 0, 0)
 
     def update_locs(curr_time=None):
         if curr_time is None:
@@ -118,10 +129,11 @@ def load_view():
         locs = []
         for i in students.index:
             locs.append(curr_loc(students['name'][i], curr_time))
-
-        lats, lons = map(list, zip(*locs))
+        
+        lats, lons, sizes = map(list, zip(*locs))
         students['lat'] = lats
         students['lon'] = lons
+        students['size'] = sizes
 
     update_locs(st.session_state.get("map_slider_key", start_time))
 
@@ -158,7 +170,7 @@ def load_view():
         opacity=0.3,
         filled=True,
         get_position='[lon, lat]',
-        get_radius=12,
+        get_radius='size',
         get_fill_color='color',
     )
 
