@@ -76,8 +76,12 @@ def load_view():
         timelines[person['Name']] = joined.loc[joined["Name"]
                                                == person["Name"]].drop(columns=['Name'])
 
+    def hextorgb(s):
+        return [int(s[i:i+2], 16) for i in (1, 3, 5)]
+        
     students = people_data.loc[:, ['Name']]
     students.columns = ['name']
+    students['color'] = list(map(hextorgb, people_data['Hair colour']))
     students[['lat', 'lon']] = 0
 
     def curr_loc(name, time):
@@ -155,7 +159,7 @@ def load_view():
         filled=True,
         get_position='[lon, lat]',
         get_radius=12,
-        get_fill_color=[255, 0, 0],
+        get_fill_color='color',
     )
 
     deck = pdk.Deck(
